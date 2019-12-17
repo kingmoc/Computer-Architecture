@@ -8,7 +8,7 @@ class CPU:
     def __init__(self):
         """Construct a new CPU."""
         self.reg = [0] * 8 # like vars
-        self.ram = [0] * 8
+        self.ram = [0] * 256
         self.pc = 0
         self.mar = 0
         self.mdr = 0
@@ -18,28 +18,63 @@ class CPU:
 
     def ram_write(self, value, address):
         self.ram[address] = value
+    
+    def filter_comment(self, line):
+        if line[0] == '#' or line[0] == "\n":
+            return False
+        else:
+            return True
 
-    def load(self):
+    def load(self, file_location):
         """Load a program into memory."""
+        program_to_run = []
+        with open(file_location) as file:
+            program = file.readlines()
+
+        # print(program[1].split('#'))
+        program_fil = list(filter(self.filter_comment, program))
+        for line_exc in program_fil:
+            head, sep, tail = line_exc.partition('#')
+            program_to_run.append(int(head,2))
 
         address = 0
 
-        # For now, we've just hardcoded a program:
-
-        program = [
-            # From print8.ls8
-            0b10000010, # LDI R0,8
-            0b00000000,
-            0b00001000,
-            0b01000111, # PRN R0
-            0b00000000,
-            0b00000001, # HLT
-        ]
-
-        for instruction in program:
+        for instruction in program_to_run:
             self.ram[address] = instruction
             address += 1
 
+    def run(self):
+        """Run the CPU."""
+        IR = self.pc
+        halted = False
+
+        while not halted:
+            operand_a = self.ram_read(IR+1)
+            operand_b = self.ram_read(IR+2)
+            instruction = self.ram[IR]
+
+            if instruction == 0x82: #LDI
+                self.reg[operand_a] = operand_b
+                IR += 3
+
+            elif instruction == 0x47: #PRN
+                value = self.reg[operand_a]
+                print(value)
+                IR += 2
+
+            elif instruction == 0xA2: #MULT
+                value = self.reg[operand_a] * self.reg[operand_b]
+                self.reg[operand_a] = value
+                IR += 3
+            
+            elif instruction == 0b1: #HLT
+                halted = True
+                IR += 1
+            
+            else:
+                print(f"Unknown Instruction at index {IR}")
+                print(self.ram[IR])
+                sys.exit(1)
 
     def alu(self, op, reg_a, reg_b):
         """ALU operations."""
@@ -69,30 +104,3 @@ class CPU:
             print(" %02X" % self.reg[i], end='')
 
         print()
-
-    def run(self):
-        """Run the CPU."""
-        IR = self.pc
-        operand_a = self.ram_read(self.pc+1)
-        operand_b = self.ram_read(self.pc+2)
-        halted = False
-
-        while not halted:
-            instruction = self.ram[IR]
-
-            if instruction == 0x82: #LDI
-                self.reg[operand_a] = operand_b
-                IR += 3
-
-            elif instruction == 0x47: #PRN
-                value = self.reg[operand_a]
-                print(value)
-                IR += 2
-            
-            elif instruction == 0x1: #HLT
-                halted = True
-                IR += 1
-            
-            else:
-                print(f"Unknown Instruction at index {IR}")
-                sys.exit(1)
