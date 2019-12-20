@@ -99,6 +99,24 @@ class CPU:
                     self.fl = 0b00000010
                 IR += 3
 
+            elif instruction == 0x55 : #JEQ
+                print(self.fl)
+                if self.fl & (1 << 1):
+                    print('not equal')
+                    IR = self.reg[operand_a]
+                else: 
+                    print('something wrong')
+                    IR += 2
+
+            elif instruction == 0x56 : #JNE
+                print(self.fl)
+                if self.fl & (0 << 1):
+                    print('not equal')
+                    IR = self.reg[operand_a]
+                else: 
+                    print('something wrong')
+                    IR += 2
+
             elif instruction == 0x50: #CALL
                 SP -= 1
                 self.ram[SP] = IR + 2
