@@ -31,7 +31,6 @@ class CPU:
         with open(file_location) as file:
             program = file.readlines()
 
-        # print(program[1].split('#'))
         program_fil = list(filter(self.filter_comment, program))
         for line_exc in program_fil:
             head, sep, tail = line_exc.partition('#')
@@ -47,6 +46,8 @@ class CPU:
         """Run the CPU."""
         IR = self.pc
         halted = False
+        self.reg[7] = 0xF4
+        SP = self.reg[7]
 
         while not halted:
             operand_a = self.ram_read(IR+1)
@@ -67,6 +68,32 @@ class CPU:
                 self.reg[operand_a] = value
                 IR += 3
             
+            elif instruction == 0xA0: #ADD
+                value = self.reg[operand_a] + self.reg[operand_b]
+                self.reg[operand_a] = value
+                IR += 3
+
+            elif instruction == 0x45: #PUSH
+                SP -= 1
+                value = self.reg[operand_a]
+                self.ram[SP] = value
+                IR += 2
+
+            elif instruction == 0x46: #POP
+                value = self.ram[SP]
+                self.reg[operand_a] = value
+                SP += 1
+                IR += 2
+
+            elif instruction == 0x50: #CALL
+                SP -= 1
+                self.ram[SP] = IR + 2
+                IR = self.reg[operand_a]
+            
+            elif instruction == 0x11: # RET
+                value = self.ram[SP]
+                IR = value
+
             elif instruction == 0b1: #HLT
                 halted = True
                 IR += 1
