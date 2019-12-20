@@ -64,6 +64,7 @@ class CPU:
                 value = self.reg[operand_a]
                 print(value)
                 IR += 2
+                # break
 
             elif instruction == 0xA2: #MULT
                 value = self.reg[operand_a] * self.reg[operand_b]
@@ -100,21 +101,15 @@ class CPU:
                 IR += 3
 
             elif instruction == 0x55: #JEQ
-                print(self.fl)
-                if self.fl & (1 << 1):
-                    print('not equal')
+                if self.fl == 1:
                     IR = self.reg[operand_a]
                 else: 
-                    print('something wrong')
                     IR += 2
 
             elif instruction == 0x56: #JNE
-                print(self.fl)
-                if self.fl & (0 << 1):
-                    print('not equal')
+                if self.fl == 4:
                     IR = self.reg[operand_a]
                 else: 
-                    print('something wrong')
                     IR += 2
 
             elif instruction == 0x54: #JMP
