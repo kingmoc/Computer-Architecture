@@ -99,7 +99,7 @@ class CPU:
                     self.fl = 0b00000010
                 IR += 3
 
-            elif instruction == 0x55 : #JEQ
+            elif instruction == 0x55: #JEQ
                 print(self.fl)
                 if self.fl & (1 << 1):
                     print('not equal')
@@ -108,7 +108,7 @@ class CPU:
                     print('something wrong')
                     IR += 2
 
-            elif instruction == 0x56 : #JNE
+            elif instruction == 0x56: #JNE
                 print(self.fl)
                 if self.fl & (0 << 1):
                     print('not equal')
@@ -116,6 +116,9 @@ class CPU:
                 else: 
                     print('something wrong')
                     IR += 2
+
+            elif instruction == 0x54: #JMP
+                IR = self.reg[operand_a]
 
             elif instruction == 0x50: #CALL
                 SP -= 1
