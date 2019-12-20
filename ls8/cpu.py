@@ -10,9 +10,11 @@ class CPU:
         self.reg = [0] * 8 # like vars
         self.ram = [0] * 256
         self.pc = 0
-        self.mar = 0
+        self.fl = 0
+        """
+        self.mar = 0 
         self.mdr = 0
-
+        """
     def ram_read(self, address):
         return self.ram[address]
 
@@ -85,6 +87,18 @@ class CPU:
                 SP += 1
                 IR += 2
 
+            elif instruction == 0xA7: #CMP
+                a = self.reg[operand_a]
+                b = self.reg[operand_b]
+
+                if a == b:
+                    self.fl = 0b00000001
+                if a < b:
+                    self.fl = 0b00000100
+                if a > b:
+                    self.fl = 0b00000010
+                IR += 3
+
             elif instruction == 0x50: #CALL
                 SP -= 1
                 self.ram[SP] = IR + 2
@@ -97,6 +111,7 @@ class CPU:
             elif instruction == 0b1: #HLT
                 halted = True
                 IR += 1
+                # self.trace()
             
             else:
                 print(f"Unknown Instruction at index {IR}")
